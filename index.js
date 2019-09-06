@@ -15,7 +15,12 @@ function wrap(fn) {
   const newFn = function newFn(...args) {
     const ret = fn.apply(this, args);
     const next = (args.length === 5 ? args[2] : last(args)) || noop;
-    if (ret && ret.catch) ret.catch(err => next(err));
+    if (ret && ret.then) {
+      ret.then(
+        res => next(null, res),
+        err => next(err),
+      );
+    }
     return ret;
   };
   Object.defineProperty(newFn, 'length', {

@@ -21,6 +21,60 @@ describe('express-async-errors', () => {
       .expect(495);
   });
 
+  it('propagates route control down a chain of routes', () => {
+    const app = express();
+
+    app.get(
+      '/test',
+      async () => true,
+      async (req) => {
+        req.resultFromServer = true;
+      },
+      async (req, res) => {
+        if (!req.resultFromServer) {
+          throw new Error('error');
+        }
+        res.end();
+      },
+    );
+
+    app.use((err, req, res, next) => {
+      res.status(495);
+      res.end();
+    });
+
+    return supertest(app)
+      .get('/test')
+      .expect(200);
+  });
+
+  it('propagates routes errors through a chain of routes to error handler', () => {
+    const app = express();
+
+    app.get(
+      '/test',
+      async () => true,
+      async (req) => {
+        req.resultFromServer = false;
+      },
+      async (req, res) => {
+        if (!req.resultFromServer) {
+          throw new Error('error');
+        }
+        res.end();
+      },
+    );
+
+    app.use((err, req, res, next) => {
+      res.status(495);
+      res.end();
+    });
+
+    return supertest(app)
+      .get('/test')
+      .expect(495);
+  });
+
   it('propagates regular middleware errors too', () => {
     const app = express();
 

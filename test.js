@@ -21,6 +21,33 @@ describe('express-async-errors', () => {
       .expect(495);
   });
 
+  it('propagates routes control to next route handler using next(\'route\')', () => {
+    const app = express();
+
+    app.get(
+      '/test',
+      async () => {
+        throw new Error('route');
+      },
+      async () => {
+        throw new Error('error');
+      },
+    );
+
+    app.get('/test*', async (req, res) => {
+      res.end();
+    });
+
+    app.use((err, req, res, next) => {
+      res.status(495);
+      res.end();
+    });
+
+    return supertest(app)
+      .get('/test')
+      .expect(200);
+  });
+
   it('propagates route control down a chain of routes', () => {
     const app = express();
 

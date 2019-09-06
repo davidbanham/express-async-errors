@@ -18,7 +18,7 @@ function wrap(fn) {
     if (ret && ret.then) {
       ret.then(
         res => next(null, res),
-        err => next(err),
+        err => next(err.message === 'route' ? err.message : err),
       );
     }
     return ret;

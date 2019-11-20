@@ -1,3 +1,5 @@
+'use strict';
+
 const Layer = require('express/lib/router/layer');
 const Router = require('express/lib/router');
 

@@ -1,3 +1,7 @@
+'use strict';
+
+/* eslint-env mocha */
+
 require('./index.js');
 const express = require('express');
 const supertest = require('supertest');
@@ -117,6 +121,7 @@ describe('express-async-errors', () => {
         res.status(200).send('Ok');
       })
       .describe({ hasDescription: true });
+
     app.use('/', router);
 
     const appRouteStack = app._router.stack;

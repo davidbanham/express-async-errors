@@ -48,5 +48,8 @@
   },
   "peerDependencies": {
     "express": "^4.16.2"
+  },
+  "dependencies": {
+    "co": "^4.6.0"
   }
 }

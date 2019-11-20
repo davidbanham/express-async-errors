@@ -10,6 +10,8 @@ module.exports = {
     strict: ['error', 'safe'],
     'no-underscore-dangle': 'off',
     'no-param-reassign': 'off',
-    'no-unused-vars': ['error', { 'argsIgnorePattern': 'next|res|req|err' }]
+    'no-unused-vars': ['error', { 'argsIgnorePattern': 'next|res|req|err' }],
+    'func-names': ['error', 'always', { generators: 'never' }],
+    'require-yield': 'off'
   }
 };

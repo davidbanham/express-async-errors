@@ -4,7 +4,7 @@
 [![install size](https://badgen.net/packagephobia/install/express-async-errors)](https://packagephobia.now.sh/result?p=express-async-errors)
 [![npm package version](https://badgen.net/npm/v/express-async-errors)](https://npm.im/express-async-errors)
 
-A dead simple ES6 async/await support hack for [ExpressJS](http://expressjs.com)
+A dead simple ES6 generators and async/await support hack for [ExpressJS](http://expressjs.com)
 
 Shamelessly copied from [express-yields](https://github.com/MadRabbit/express-yields)
 
@@ -28,6 +28,12 @@ const app = express();
 
 app.get('/users', async (req, res) => {
   const users = await User.findAll();
+  res.send(users);
+});
+
+// or with generators
+app.get('/users', function* (req, res) {
+  const users = yield User.findAll();
   res.send(users);
 });
 ```

@@ -5,7 +5,7 @@ const co = require('co');
 const Layer = require('express/lib/router/layer');
 const { Router } = require('express');
 
-// eslint-disable-next-line func-names, no-empty-function
+// eslint-disable-next-line no-empty-function
 const GeneratorFunction = (function* () {}).constructor;
 
 const isError = (arg) => arg instanceof Error;

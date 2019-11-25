@@ -1,10 +1,16 @@
+'use strict';
+
+/* eslint-env mocha */
+
 require('./index.js');
 const express = require('express');
 const supertest = require('supertest');
 const assert = require('assert');
 
+const last = (arr) => arr[arr.length - 1];
+
 describe('express-async-errors', () => {
-  it('propagates routes errors to error handler', () => {
+  it('should propagate route handler errors to error handler', () => {
     const app = express();
 
     app.get('/test', async () => {
@@ -12,8 +18,7 @@ describe('express-async-errors', () => {
     });
 
     app.use((err, req, res, next) => {
-      res.status(495);
-      res.end();
+      res.status(495).end();
     });
 
     return supertest(app)
@@ -21,7 +26,7 @@ describe('express-async-errors', () => {
       .expect(495);
   });
 
-  it('propagates regular middleware errors too', () => {
+  it('should propagate middleware errors to error handler', () => {
     const app = express();
 
     app.use(async () => {
@@ -33,8 +38,7 @@ describe('express-async-errors', () => {
     });
 
     app.use((err, req, res, next) => {
-      res.status(495);
-      res.end();
+      res.status(495).end();
     });
 
     return supertest(app)
@@ -42,7 +46,7 @@ describe('express-async-errors', () => {
       .expect(495);
   });
 
-  it('and propagates error middleware errors too', () => {
+  it('should propagate error middleware errors to error handler', () => {
     const app = express();
 
     app.get('/test', async () => {
@@ -54,8 +58,7 @@ describe('express-async-errors', () => {
     });
 
     app.use((err, req, res, next) => {
-      res.status(495);
-      res.end();
+      res.status(495).end();
     });
 
     return supertest(app)
@@ -63,7 +66,7 @@ describe('express-async-errors', () => {
       .expect(495);
   });
 
-  it('and propagates param middleware errors too', () => {
+  it('should propagate param middleware errors to error handler', () => {
     const app = express();
 
     app.param('id', async () => {
@@ -75,8 +78,7 @@ describe('express-async-errors', () => {
     });
 
     app.use((err, req, res, next) => {
-      res.status(495);
-      res.end();
+      res.status(495).end();
     });
 
     return supertest(app)
@@ -89,8 +91,8 @@ describe('express-async-errors', () => {
 
     function swaggerize(item) {
       function describeRouterRoute(router, metaData) {
-        const lastRoute = router.stack[router.stack.length - 1];
-        const verb = Object.keys(lastRoute.route.methods)[0];
+        const lastRoute = last(router.stack);
+        const [verb] = Object.keys(lastRoute.route.methods);
         metaData.path = lastRoute.route.path;
         metaData.verb = verb;
         lastRoute.route.swaggerData = metaData;
@@ -114,15 +116,17 @@ describe('express-async-errors', () => {
 
     router
       .get('/test', (req, res) => {
-        res.status(200).send('Ok');
+        res.status(200).end();
       })
       .describe({ hasDescription: true });
+
     app.use('/', router);
 
     const appRouteStack = app._router.stack;
-    const someMiddlewareFunctionStack = appRouteStack[appRouteStack.length - 1];
+    const someMiddlewareFunctionStack = last(appRouteStack);
     const innerStack = someMiddlewareFunctionStack.handle.stack;
     const routeData = innerStack[0].route.swaggerData;
+
     assert.ok(routeData);
     assert.equal(routeData.verb, 'get');
     assert.equal(routeData.hasDescription, true);

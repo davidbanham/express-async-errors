@@ -1,36 +1,40 @@
+'use strict';
+
+const { IncomingMessage, ServerResponse } = require('http');
+const co = require('co');
 const Layer = require('express/lib/router/layer');
-const Router = require('express/lib/router');
+const { Router } = require('express');
 
-const last = (arr = []) => arr[arr.length - 1];
-const noop = Function.prototype;
+// eslint-disable-next-line no-empty-function
+const GeneratorFunction = (function* () {}).constructor;
 
-function copyFnProps(oldFn, newFn) {
-  Object.keys(oldFn).forEach((key) => {
-    newFn[key] = oldFn[key];
-  });
-  return newFn;
+const isError = (arg) => arg instanceof Error;
+const isGeneratorFunction = (arg) => arg instanceof GeneratorFunction;
+const isRequest = (arg) => arg instanceof IncomingMessage;
+const isResponse = (arg) => arg instanceof ServerResponse;
+const noop = () => {};
+
+function copyProps(source, dest) {
+  return Object.keys(source).reduce((acc, key) => {
+    const value = source[key];
+    return Object.assign(acc, { [key]: value });
+  }, dest);
 }
 
 function wrap(fn) {
   const newFn = function newFn(...args) {
+    if (isGeneratorFunction(fn)) fn = co.wrap(fn);
     const ret = fn.apply(this, args);
-    const next = (args.length === 5 ? args[2] : last(args)) || noop;
-    if (ret && ret.catch) ret.catch(err => next(err));
+    const predicates = [isError, isRequest, isResponse];
+    const next = args.find((arg) => predicates.every((match) => !match(arg))) || noop;
+    if (ret && ret.catch) ret.catch((err) => next(err));
     return ret;
   };
   Object.defineProperty(newFn, 'length', {
     value: fn.length,
     writable: false,
   });
-  return copyFnProps(fn, newFn);
-}
-
-function patchRouterParam() {
-  const originalParam = Router.prototype.constructor.param;
-  Router.prototype.constructor.param = function param(name, fn) {
-    fn = wrap(fn);
-    return originalParam.call(this, name, fn);
-  };
+  return copyProps(fn, newFn);
 }
 
 Object.defineProperty(Layer.prototype, 'handle', {
@@ -44,4 +48,8 @@ Object.defineProperty(Layer.prototype, 'handle', {
   },
 });
 
-patchRouterParam();
+const originalParam = Router.prototype.constructor.param;
+Router.prototype.constructor.param = function param(name, fn) {
+  fn = wrap(fn);
+  return originalParam.call(this, name, fn);
+};

@@ -1,8 +1,10 @@
 # ExpressJS Async Errors
 
-[![Build Status](https://travis-ci.org/davidbanham/express-async-errors.svg?branch=master)](https://travis-ci.org/davidbanham/express-async-errors)
+[![build status](https://badgen.net/travis/davidbanham/express-async-errors/master)](https://travis-ci.com/davidbanham/express-async-errors)
+[![install size](https://badgen.net/packagephobia/install/express-async-errors)](https://packagephobia.now.sh/result?p=express-async-errors)
+[![npm package version](https://badgen.net/npm/v/express-async-errors)](https://npm.im/express-async-errors)
 
-A dead simple ES6 async/await support hack for [ExpressJS](http://expressjs.com)
+A dead simple ES6 generators and async/await support hack for [ExpressJS](http://expressjs.com)
 
 Shamelessly copied from [express-yields](https://github.com/MadRabbit/express-yields)
 
@@ -14,7 +16,7 @@ This has been lightly reworked to handle async rather than generators.
 npm install express-async-errors --save
 ```
 
-Then require this script somewhere __before__ you start using it:
+Then require this script somewhere **before** you start using it:
 
 Async functions already work fine in Express.
 
@@ -26,6 +28,12 @@ const app = express();
 
 app.get('/users', async (req, res) => {
   const users = await User.findAll();
+  res.send(users);
+});
+
+// or with generators
+app.get('/users', function* (req, res) {
+  const users = yield User.findAll();
   res.send(users);
 });
 ```

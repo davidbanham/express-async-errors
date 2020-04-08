@@ -18,9 +18,15 @@ function wrap(fn) {
     if (ret && ret.catch) ret.catch(err => next(err));
     return ret;
   };
-  Object.defineProperty(newFn, 'length', {
-    value: fn.length,
-    writable: false,
+  Object.defineProperties(newFn, {
+    length: {
+      value: fn.length,
+      writable: false
+    },
+    name: {
+      value: fn.name,
+      writable: false
+    }
   });
   return copyFnProps(fn, newFn);
 }
